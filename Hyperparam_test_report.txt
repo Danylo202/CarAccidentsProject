@@ -1,0 +1,83 @@
+Підбір train_size
+==================================================
+Параметри: train_size=70, lr=5e-5, pos_weight=3.0, hidden_size = 256, dropout =  0.3, batch_size = 8
+--- Результати ---
+Final Val Loss:  0.2308
+Final Recall:    0.9372
+Final Precision: 0.6627
+==================================================
+
+==================================================
+Параметри: train_size=90, lr=3e-5, pos_weight=3.0, hidden_size = 256, dropout =  0.3, batch_size = 4
+--- Результати ---
+Final Val Loss:  0.2164
+Final Recall:    0.9266
+Final Precision: 0.7196
+==================================================
+
+==================================================
+Параметри: train_size=80, lr=5e-5, pos_weight=3.0, hidden_size = 256, dropout =  0.3, batch_size = 8
+--- Результати ---
+Final Val Loss:  0.2272
+Final Recall:    0.9518
+Final Precision: 0.6497
+==================================================
+
+Підбір dropout
+==================================================
+Параметри: train_size=70, lr=5e-5, pos_weight=3.0, hidden_size = 256, dropout =  0.0, batch_size = 8
+--- Результати ---
+Final Val Loss:  0.2469
+Final Recall:    0.9425
+Final Precision: 0.6310
+==================================================
+
+==================================================
+Параметри: train_size=70, lr=5e-5, pos_weight=3.0, hidden_size = 256, dropout =  0.2, batch_size = 8
+--- Результати ---
+Final Val Loss:  0.2500
+Final Recall:    0.9183
+Final Precision: 0.6576
+==================================================
+
+==================================================
+Параметри: train_size=70, lr=5e-5, pos_weight=3.0, hidden_size = 256, dropout =  0.4, batch_size = 8
+--- Результати ---
+Final Val Loss:  0.2414
+Final Recall:    0.9047
+Final Precision: 0.6847
+==================================================
+
+Підбір hidden_size
+==================================================
+Параметри: train_size=70, lr=5e-5, pos_weight=3.0, hidden_size = 512, dropout =  0.3, batch_size = 8
+--- Результати ---
+Final Val Loss:  0.2548
+Final Recall:    0.9110
+Final Precision: 0.6729
+==================================================
+
+==================================================
+Параметри: train_size=70, lr=5e-5, pos_weight=3.0, hidden_size = 128, dropout =  0.3, batch_size = 8
+--- Результати ---
+Final Val Loss:  0.2336
+Final Recall:    0.9010
+Final Precision: 0.7033
+==================================================
+
+Підбір декількох параметрів
+==================================================
+Параметри: train_size=70, lr=5e-5, pos_weight=3.0, hidden_size = 128, dropout =  0.1, batch_size = 8
+--- Результати ---
+Final Val Loss:  0.2434
+Final Recall:    0.9266
+Final Precision: 0.6398
+==================================================
+
+==================================================
+Параметри: train_size=80, lr=5e-5, pos_weight=3.0, hidden_size = 512, dropout =  0.4, batch_size = 8
+--- Результати ---
+Final Val Loss:  0.2748
+Final Recall:    0.9206
+Final Precision: 0.5829
+==================================================
