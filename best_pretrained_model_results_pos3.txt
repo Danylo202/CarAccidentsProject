@@ -1,0 +1,5 @@
+=== Найкраща модель ===
+Епоха: 16
+Validation Loss: 0.2546
+Precision: 0.6642
+Recall: 0.8883
