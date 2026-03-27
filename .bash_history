@@ -43,3 +43,6 @@ cd /teamspace/studios/this_studio
 nano .gitignore
 cat .gitignore
 git init
+git add .
+git commit -m "Initial commit: Accident Detection Model"
+gh repo create CarAccidentsProject --public --source=. --remote=origin --push

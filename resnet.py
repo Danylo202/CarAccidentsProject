@@ -82,9 +82,9 @@ class RawVideoDataset(Dataset):
             last_frame = video[-1:]
             padding = np.repeat(last_frame, padding_size, axis=0)
             video = np.concatenate([video, padding], axis=0)
-        elif current_frames > target_frames:
-            # Якщо раптом більше 50 — обрізаємо
-            video = video[:target_frames]
+        # elif current_frames > target_frames:
+        #     # Якщо раптом більше 50 — обрізаємо
+        #     video = video[:target_frames]
 
         video = torch.from_numpy(video).float() / 255.0
         for t in range(video.size(0)):
@@ -101,8 +101,8 @@ class RawVideoDataset(Dataset):
         return combined_video, label
 
 # Створюємо лоадери
-train_loader = DataLoader(RawVideoDataset(train_paths, train_labels), batch_size=64, shuffle=True, num_workers=0)
-val_loader = DataLoader(RawVideoDataset(val_paths, val_labels), batch_size=64, shuffle=False, num_workers=0)
+train_loader = DataLoader(RawVideoDataset(train_paths, train_labels), batch_size=8, shuffle=True, num_workers=0)
+val_loader = DataLoader(RawVideoDataset(val_paths, val_labels), batch_size=8, shuffle=False, num_workers=0)
 
 # ==========================================
 # 3. АРХІТЕКТУРА МОДЕЛІ
@@ -143,7 +143,7 @@ class ResBlock(nn.Module):
         return F.relu(out)
 
 class CustomResidualExtractor(nn.Module):
-    def __init__(self, feature_dim=512):
+    def __init__(self, feature_dim=256):
         super().__init__()
         # Початковий шар (Stem) - приймає RGB
         self.stem = nn.Sequential(
@@ -223,42 +223,43 @@ def validate_and_metrics(model, loader, criterion, device):
     
     return avg_loss, recall, precision
 
-# ==========================================
-# 4. ЦИКЛ НАВЧАННЯ
-# ==========================================
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = AccidentDetectionModel().to(device)
-optimizer = optim.Adam(model.parameters(), lr=5e-5)
-scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=3, factor=0.5)
-criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([3.0]).to(device))
+if __name__ == '__main__':
+    # ==========================================
+    # 4. ЦИКЛ НАВЧАННЯ
+    # ==========================================
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = AccidentDetectionModel().to(device)
+    optimizer = optim.Adam(model.parameters(), lr=5e-5)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=3, factor=0.5)
+    criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([3.0]).to(device))
 
-best_val_loss = float('inf')
+    best_val_loss = float('inf')
 
-print(f"Навчання розпочато на пристрої: {device}")
+    print(f"Навчання розпочато на пристрої: {device}")
 
-for epoch in range(20):
-    model.train()
-    train_loss = 0
-    for i, (videos, labels) in enumerate(train_loader):
-        videos, labels = videos.to(device), labels.to(device)
+    for epoch in range(20):
+        model.train()
+        train_loss = 0
+        for i, (videos, labels) in enumerate(train_loader):
+            videos, labels = videos.to(device), labels.to(device)
+            
+            optimizer.zero_grad()
+            outputs = model(videos)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+
+            train_loss += loss.item()
+            if i % 20 == 0:
+                print(f"Епоха {epoch+1}, Батч {i}, Loss: {loss.item():.4f}")
+
+        # Валідація в кінці епохи
+        avg_loss, rec, prec = validate_and_metrics(model, val_loader, criterion, device)
+        scheduler.step(avg_loss)
+        print(f"--- Епоха {epoch+1} ЗАВЕРШЕНА. Avg Val Loss: {avg_loss:.4f} ---")
+        print(f"Recall: {rec:.4f} | Precision: {prec:.4f}")
         
-        optimizer.zero_grad()
-        outputs = model(videos)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-
-        train_loss += loss.item()
-        if i % 20 == 0:
-            print(f"Епоха {epoch+1}, Батч {i}, Loss: {loss.item():.4f}")
-
-    # Валідація в кінці епохи
-    avg_loss, rec, prec = validate_and_metrics(model, val_loader, criterion, device)
-    scheduler.step(avg_loss)
-    print(f"--- Епоха {epoch+1} ЗАВЕРШЕНА. Avg Val Loss: {avg_loss:.4f} ---")
-    print(f"Recall: {rec:.4f} | Precision: {prec:.4f}")
-    
-    if avg_loss < best_val_loss:
-        best_val_loss = avg_loss
-        torch.save(model.state_dict(), 'res_5_best_end_to_end_model.pth')
-        print("  [NEW BEST MODEL SAVED]")
+        if avg_loss < best_val_loss:
+            best_val_loss = avg_loss
+            torch.save(model.state_dict(), 'res_5_best_end_to_end_model.pth')
+            print("  [NEW BEST MODEL SAVED]")

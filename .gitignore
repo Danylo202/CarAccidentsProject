@@ -1,5 +1,2 @@
 Video_Tensors/
-positive.zip
-negative.zip
-*.pth
 *.npy

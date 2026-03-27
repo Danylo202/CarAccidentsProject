@@ -1,0 +1,25 @@
+
+--- Результати за часом доби ---            loss    recall  precision
+timing                               
+Day     0.352201  0.941873   0.744558
+Night   0.409860  0.876574   0.708137
+--- Результати за погодою ---             loss    recall  precision
+weather                               
+Normal   0.359256  0.934437   0.745406
+Rainy    0.382835  0.915647   0.743364
+Snowy    0.344716  0.943188   0.713948
+--- Топ найскладніших комбінацій (Loss) ---timing        Day     Night
+weather                    
+Normal   0.353679  0.403792
+Rainy    0.362584  0.502090
+Snowy    0.339522  0.380211
+--- Топ найскладніших комбінацій (Recall) ---timing        Day     Night
+weather                    
+Normal   0.940753  0.884008
+Rainy    0.932892  0.814098
+Snowy    0.952057  0.882587
+--- Топ найскладніших комбінацій (Precision) ---timing        Day     Night
+weather                    
+Normal   0.749113  0.715807
+Rainy    0.757713  0.658862
+Snowy    0.715223  0.705233
