@@ -50,7 +50,7 @@ for p in neg_files:
 
 # Розбиття на Train (70%), Val (15%), Test (15%)
 train_paths, temp_paths, train_labels, temp_labels = train_test_split(
-    all_paths, all_labels, test_size=0.3, random_state=42
+    all_paths, all_labels, test_size=0.2, random_state=42
 )
 val_paths, test_paths, val_labels, test_labels = train_test_split(
     temp_paths, temp_labels, test_size=0.5, random_state=42
@@ -195,6 +195,29 @@ class AccidentDetectionModel(nn.Module):
         out = self.classifier(lstm_out)
         return out
 
+class FocalLoss(nn.Module):
+    def __init__(self, alpha=2.0, gamma=2.0):
+        super().__init__()
+        self.alpha = alpha
+        self.gamma = gamma
+        self.bce = nn.BCEWithLogitsLoss(reduction='none')
+
+    def forward(self, inputs, targets):
+        # inputs: логіти від моделі, targets: мітки 0/1
+        bce_loss = self.bce(inputs, targets)
+        
+        # Рахуємо ймовірність p_t
+        probs = torch.sigmoid(inputs)
+        # p_t = p, якщо target=1, і (1-p), якщо target=0
+        pt = targets * probs + (1 - targets) * (1 - probs)
+        
+        # Формула Focal Loss
+        # Додаємо alpha для ваги позитивного класу
+        w = targets * self.alpha + (1 - targets) * 1.0
+        loss = w * (1 - pt)**self.gamma * bce_loss
+        
+        return loss.mean()
+
 def validate_and_metrics(model, loader, criterion, device):
     model.eval()
     total_loss = 0.0
@@ -231,7 +254,8 @@ if __name__ == '__main__':
     model = AccidentDetectionModel().to(device)
     optimizer = optim.Adam(model.parameters(), lr=5e-5)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=3, factor=0.5)
-    criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([3.0]).to(device))
+    criterion = FocalLoss(alpha=1.5, gamma=2.0)
+    # criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([2.0]).to(device))
 
     best_val_loss = float('inf')
 
@@ -256,10 +280,13 @@ if __name__ == '__main__':
         # Валідація в кінці епохи
         avg_loss, rec, prec = validate_and_metrics(model, val_loader, criterion, device)
         scheduler.step(avg_loss)
+        with open('test3.txt', 'a') as f:
+            f.write(f"--- Епоха {epoch+1} ЗАВЕРШЕНА. Avg Val Loss: {avg_loss:.4f} ---")
+            f.write(f"Recall: {rec:.4f} | Precision: {prec:.4f}")
         print(f"--- Епоха {epoch+1} ЗАВЕРШЕНА. Avg Val Loss: {avg_loss:.4f} ---")
         print(f"Recall: {rec:.4f} | Precision: {prec:.4f}")
         
         if avg_loss < best_val_loss:
             best_val_loss = avg_loss
-            torch.save(model.state_dict(), 'res_5_best_end_to_end_model.pth')
+            torch.save(model.state_dict(), 'model3.pth')
             print("  [NEW BEST MODEL SAVED]")

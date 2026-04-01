@@ -1,0 +1,20 @@
+
+==================================================
+MODEL: AccidentDetectionModel (MTL: Accident + Ego)
+SETTINGS: LR=5e-5, Batch=8, Pos_Weight=3.0, epochs = 20
+--- RESULTS (Accident Detection) ---
+Final Val Loss:  0.6471
+Final Recall:    0.8087
+Final Precision: 0.7201
+Final Ego Involve Accuracy: 86.25%
+==================================================
+
+==================================================
+MODEL: PretrainedMTLModel (MTL: Accident + Ego)
+SETTINGS: LR=5e-5, Batch=8, Pos_Weight=3.0
+--- RESULTS (Accident Detection) ---
+Final Val Loss:  0.6796
+Final Recall:    0.9158
+Final Precision: 0.7425
+Final Ego Involve Accuracy: 78.77%
+==================================================

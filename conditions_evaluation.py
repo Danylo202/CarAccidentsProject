@@ -97,7 +97,7 @@ def evaluate_by_conditions(model, device, data_root):
 
 model = AccidentDetectionModel(hidden_size=256).to(device)
 
-model.load_state_dict(torch.load('models/res_5_best_end_to_end_model_dropout0.pth', map_location=device))
+model.load_state_dict(torch.load('classic_models/res_5_best_end_to_end_model_dropout0.pth', map_location=device))
 df_results = evaluate_by_conditions(model, device, 'Video_Tensors')
 
 with open('models_analyzed/res_5_best_end_to_end_model_dropout0_analysis.txt', 'a') as f:

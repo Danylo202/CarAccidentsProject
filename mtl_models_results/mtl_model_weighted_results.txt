@@ -1,0 +1,10 @@
+
+==================================================
+MODEL: AccidentDetectionModel (MTL: Accident + Ego)
+SETTINGS: LR=5e-5, Batch=8, Pos_Weight=3.0
+--- RESULTS (Accident Detection) ---
+Final Val Loss:  0.4383
+Final Recall:    0.9139
+Final Precision: 0.6432
+Final Ego Involve Accuracy: 85.83%
+==================================================

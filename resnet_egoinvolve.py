@@ -245,7 +245,7 @@ def validate_and_metrics(model, loader, criterion_acc, device):
             
             if mask.sum() > 0:
                 loss_ego = (loss_ego_all * mask).sum() / mask.sum()
-                batch_loss = loss_acc + loss_ego
+                batch_loss = loss_acc + 0.5 * loss_ego
             else:
                 batch_loss = loss_acc
                 
@@ -297,45 +297,45 @@ if __name__ == '__main__':
 
     print(f"Навчання MTL-моделі розпочато на пристрої: {device}")
 
-    # for epoch in range(20):
-    #     model.train()
-    #     train_loss = 0
-    #     for i, (videos, labels_acc, labels_ego) in enumerate(train_loader):
-    #         videos = videos.to(device)
-    #         labels_acc = labels_acc.to(device)
-    #         labels_ego = labels_ego.to(device)
+    for epoch in range(20):
+        model.train()
+        train_loss = 0
+        for i, (videos, labels_acc, labels_ego) in enumerate(train_loader):
+            videos = videos.to(device)
+            labels_acc = labels_acc.to(device)
+            labels_ego = labels_ego.to(device)
             
-    #         optimizer.zero_grad()
-    #         out_acc, out_ego = model(videos)
-    #         # 1. Помилка детекції аварії (рахується завжди)
-    #         loss_acc = criterion_acc(out_acc, labels_acc)
+            optimizer.zero_grad()
+            out_acc, out_ego = model(videos)
+            # 1. Помилка детекції аварії (рахується завжди)
+            loss_acc = criterion_acc(out_acc, labels_acc)
             
-    #         # 2. Помилка участі в ДТП (рахується тільки для кадрів з реальною аварією)
-    #         loss_ego_all = F.binary_cross_entropy_with_logits(out_ego, labels_ego, reduction='none')
-    #         mask = (labels_acc == 1).float()           
-    #         if mask.sum() > 0:
-    #             loss_ego = (loss_ego_all * mask).sum() / mask.sum()
-    #             total_loss = loss_acc + loss_ego
-    #         else:
-    #             total_loss = loss_acc
-    #         total_loss.backward()
-    #         optimizer.step()
+            # 2. Помилка участі в ДТП (рахується тільки для кадрів з реальною аварією)
+            loss_ego_all = F.binary_cross_entropy_with_logits(out_ego, labels_ego, reduction='none')
+            mask = (labels_acc == 1).float()           
+            if mask.sum() > 0:
+                loss_ego = (loss_ego_all * mask).sum() / mask.sum()
+                total_loss = loss_acc + loss_ego
+            else:
+                total_loss = loss_acc
+            total_loss.backward()
+            optimizer.step()
 
-    #         train_loss += total_loss.item()
-    #         if i % 40 == 0:
-    #             print(f"Епоха {epoch+1}, Батч {i}, Loss: {total_loss.item():.4f}")
+            train_loss += total_loss.item()
+            if i % 40 == 0:
+                print(f"Епоха {epoch+1}, Батч {i}, Loss: {total_loss.item():.4f}")
 
-    #     # Валідація в кінці епохи
-    #     avg_val_loss, rec, prec, ego_acc = validate_and_metrics(model, val_loader, criterion_acc, device)
-    #     scheduler.step(avg_val_loss)
+        # Валідація в кінці епохи
+        avg_val_loss, rec, prec, ego_acc = validate_and_metrics(model, val_loader, criterion_acc, device)
+        scheduler.step(avg_val_loss)
         
-    #     print(f"--- Епоха {epoch+1} ЗАВЕРШЕНА. Avg Val Loss: {avg_val_loss:.4f} ---")
-    #     print(f"Recall (Acc): {rec:.4f} | Precision (Acc): {prec:.4f} | Ego Acc: {ego_acc:.2f}%")
+        print(f"--- Епоха {epoch+1} ЗАВЕРШЕНА. Avg Val Loss: {avg_val_loss:.4f} ---")
+        print(f"Recall (Acc): {rec:.4f} | Precision (Acc): {prec:.4f} | Ego Acc: {ego_acc:.2f}%")
         
-    #     if avg_val_loss < best_val_loss:
-    #         best_val_loss = avg_val_loss
-    #         torch.save(model.state_dict(), 'res_5_mtl_best_model.pth')
-    #         print("  [NEW BEST MODEL SAVED]")
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
+            torch.save(model.state_dict(), 'res_5_mtl_best_model.pth')
+            print("  [NEW BEST MODEL SAVED]")
 
     # ==========================================
     # 5. ФІНАЛЬНА ОЦІНКА НАЙКРАЩОЇ МОДЕЛІ
@@ -357,7 +357,7 @@ if __name__ == '__main__':
             final_model, val_loader, criterion_acc, device
         )
     # Збереження результатів у текстовий файл 
-    results_file = "best_mtl_model_results.txt"
+    results_file = "best_mtl_model_results_2.txt"
     with open(results_file, 'a', encoding="utf-8") as f:
         f.write("\n" + "="*50 + "\n")
         f.write(f"MODEL: AccidentDetectionModel (MTL: Accident + Ego)\n")

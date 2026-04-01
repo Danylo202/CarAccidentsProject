@@ -1,0 +1,4 @@
+
+--- Avg Test Loss: 0.2223 ---
+Recall: 0.9650 | Precision: 0.6293 
+F1-score: 0.7618 
